@@ -1,0 +1,37 @@
+{
+  "updated_at": "22/3/2026, 17:26:54",
+  "billing": {
+    "ventas_hoy": 450,
+    "semana": 6.14,
+    "mes": 19.166,
+    "tickets": 20,
+    "ticket_medio": 23
+  },
+  "workers": [],
+  "blocked": [
+    {
+      "nombre": "Veggies Bang",
+      "precio": "€4.30"
+    },
+    {
+      "nombre": "Berries Boom",
+      "precio": "€4.30"
+    },
+    {
+      "nombre": "Mango Passion",
+      "precio": "€4.30"
+    },
+    {
+      "nombre": "Fanta Limón",
+      "precio": "€3.00"
+    },
+    {
+      "nombre": "Fresas",
+      "precio": "€0.00"
+    },
+    {
+      "nombre": "Extra Arándanos",
+      "precio": "€0.00"
+    }
+  ]
+}
