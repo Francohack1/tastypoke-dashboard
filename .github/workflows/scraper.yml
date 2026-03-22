@@ -3,7 +3,7 @@ name: Scraper Tasty Poke
 on:
   schedule:
     - cron: '*/5 * * * *'   # cada 5 minutos
-  workflow_dispatch:          # tambien se puede lanzar manualmente
+  workflow_dispatch:          # lanzar manualmente
 
 jobs:
   scrape:
@@ -12,7 +12,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -20,18 +20,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencias
+      - name: Instalar dependencias
         run: pip install requests beautifulsoup4
 
       - name: Ejecutar scraper
-        run: python scraper.py ${{ secrets.GH_TOKEN }}
+        env:
+          AGORA_USER:   ${{ secrets.AGORA_USER }}
+          AGORA_PASS:   ${{ secrets.AGORA_PASS }}
+          ZUPLYIT_USER: ${{ secrets.ZUPLYIT_USER }}
+          ZUPLYIT_PASS: ${{ secrets.ZUPLYIT_PASS }}
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+        run: python scraper.py
 
-      - name: Commit data.json si cambio
+      - name: Commit data.json
         run: |
           git config user.name "Tasty Poke Bot"
           git config user.email "bot@tastypoke.com"
           git add data.json || true
-          git diff --staged --quiet || git commit -m "Auto-update data.json $(date '+%Y-%m-%d %H:%M')"
+          git diff --staged --quiet || git commit -m "Auto-update $(date '+%Y-%m-%d %H:%M')"
           git push || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
