@@ -1,9 +1,9 @@
 {
-  "updated_at": "22/3/2026, 17:27:33",
+  "updated_at": "22/3/2026, 17:28:26",
   "billing": {
     "ventas_hoy": 450,
-    "semana": 6.14,
-    "mes": 19.166,
+    "semana": 6140,
+    "mes": 19166,
     "tickets": 20,
     "ticket_medio": 23
   },
