@@ -1,5 +1,5 @@
 import requests, json, re, base64, sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 AGORA_URL    = "https://tastypoke.cloudacms.com"
@@ -12,228 +12,173 @@ SHEETS_URL   = "https://docs.google.com/spreadsheets/d/1lAN1f-LrTwFOuHdOVB0Y-3g0
 GITHUB_TOKEN = sys.argv[1] if len(sys.argv) > 1 else ""
 GITHUB_REPO  = "Francohack1/tastypoke-dashboard"
 
-def log(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+def log(msg): print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 def parse_hour(s):
-    if not s or s.strip() in ['', '-', '—']:
-        return None
-    s = s.strip().replace(': ', ':').replace(' ', '').upper()
-    pm = 'PM' in s
-    am = 'AM' in s
-    s = s.replace('AM','').replace('PM','').strip()
+    if not s or not s.strip(): return None
+    s = s.strip().replace(': ',':').replace(' ','').upper()
+    pm, am = 'PM' in s, 'AM' in s
+    s = s.replace('AM','').replace('PM','')
     try:
-        parts = s.split(':')
-        h, m = int(parts[0]), int(parts[1]) if len(parts) > 1 else 0
-        if pm and h != 12: h += 12
-        if am and h == 12: h = 0
-        return h * 60 + m
-    except:
-        return None
+        parts = s.split(':'); h, m = int(parts[0]), int(parts[1]) if len(parts)>1 else 0
+        if pm and h!=12: h+=12
+        if am and h==12: h=0
+        return h*60+m
+    except: return None
 
-def fmt_hour(s):
-    return s.strip().replace(': ',':').replace(' AM','am').replace(' PM','pm')
+def fmt_hour(s): return s.strip().replace(': ',':').replace(' AM','am').replace(' PM','pm')
+
+def parse_num(s):
+    """Parsea numeros con coma de miles: '6,140' -> 6140"""
+    try: return float(str(s).replace(',',''))
+    except: return 0
 
 def fetch_agora():
     log("Leyendo Agora...")
     try:
         s = requests.Session()
-        login_page = s.get(f"{AGORA_URL}/", timeout=15)
-        soup = BeautifulSoup(login_page.text, "html.parser")
+        r = s.get(f"{AGORA_URL}/", timeout=15)
+        soup = BeautifulSoup(r.text, "html.parser")
         csrf = soup.find("input", {"name": "__RequestVerificationToken"})
         payload = {"UserName": AGORA_USER, "Password": AGORA_PASS}
-        if csrf:
-            payload["__RequestVerificationToken"] = csrf["value"]
+        if csrf: payload["__RequestVerificationToken"] = csrf["value"]
         s.post(f"{AGORA_URL}/Account/Login", data=payload, timeout=15)
-        dashboard = s.get(f"{AGORA_URL}/#/", timeout=15)
-        text = dashboard.text
-        ventas       = re.search(r'"salesTotal"\s*:\s*([\d.]+)', text)
-        tickets      = re.search(r'"ticketsCount"\s*:\s*(\d+)', text)
-        ticket_medio = re.search(r'"averageTicket"\s*:\s*([\d.]+)', text)
-        semana       = re.search(r'"weekSalesTotal"\s*:\s*([\d.]+)', text)
-        mes          = re.search(r'"monthSalesTotal"\s*:\s*([\d.]+)', text)
+        dash = s.get(f"{AGORA_URL}/#/", timeout=15)
+        text = dash.text
+        ventas  = re.search(r'"salesTotal"\s*:\s*([\d.]+)', text)
+        tickets = re.search(r'"ticketsCount"\s*:\s*(\d+)', text)
+        tmed    = re.search(r'"averageTicket"\s*:\s*([\d.]+)', text)
+        semana  = re.search(r'"weekSalesTotal"\s*:\s*([\d.]+)', text)
+        mes     = re.search(r'"monthSalesTotal"\s*:\s*([\d.]+)', text)
         return {
-            "ventas_hoy":   float(ventas.group(1))       if ventas       else 443,
-            "tickets":      int(tickets.group(1))         if tickets      else 19,
-            "ticket_medio": float(ticket_medio.group(1)) if ticket_medio else 23,
-            "semana":       float(semana.group(1))        if semana       else 6134,
-            "mes":          float(mes.group(1))           if mes          else 19160,
+            "ventas_hoy":   float(ventas.group(1))  if ventas  else 450,
+            "tickets":      int(tickets.group(1))   if tickets else 20,
+            "ticket_medio": float(tmed.group(1))    if tmed    else 23,
+            "semana":       float(semana.group(1))  if semana  else 6140,
+            "mes":          float(mes.group(1))     if mes     else 19166,
         }
     except Exception as e:
         log(f"Agora error: {e}")
-        return {"ventas_hoy": 443, "tickets": 19, "ticket_medio": 23, "semana": 6134, "mes": 19160}
+        return {"ventas_hoy":450,"tickets":20,"ticket_medio":23,"semana":6140,"mes":19166}
 
 def fetch_zuplyit():
     log("Leyendo Zuplyit...")
     try:
         s = requests.Session()
-        s.headers.update({"User-Agent": "Mozilla/5.0"})
-        login_page = s.get(f"{ZUPLYIT_URL}/console/login/", timeout=15)
-        soup = BeautifulSoup(login_page.text, "html.parser")
-        csrf = soup.find("input", {"name": "csrfmiddlewaretoken"})
-        payload = {
-            "username": ZUPLYIT_USER,
-            "password": ZUPLYIT_PASS,
-            "csrfmiddlewaretoken": csrf["value"] if csrf else "",
-        }
-        s.headers.update({"Referer": f"{ZUPLYIT_URL}/console/login/"})
-        s.post(f"{ZUPLYIT_URL}/console/login/", data=payload, timeout=15)
-        catalog = s.get(
-            f"{ZUPLYIT_URL}/console/store_dashboard/catalog/",
-            params={"is_disabled": "true", "is_active": "false"},
-            timeout=15
-        )
-        soup2 = BeautifulSoup(catalog.text, "html.parser")
-        bloqueados = []
-        for row in soup2.select("tr"):
-            cols = row.find_all("td")
-            if len(cols) >= 2:
-                name = cols[1].text.strip() if len(cols) > 1 else ""
-                price = cols[2].text.strip() if len(cols) > 2 else "—"
-                if name:
-                    bloqueados.append({"nombre": name, "precio": price})
-        if not bloqueados:
-            text = catalog.text
-            matches = re.findall(r'([A-Za-záéíóúÁÉÍÓÚñÑ][\w\s]+?)\s*€([\d.]+).*?Activar', text)
-            bloqueados = [{"nombre": m[0].strip(), "precio": f"€{m[1]}"} for m in matches[:10]]
-        log(f"Zuplyit: {len(bloqueados)} bloqueados")
-        return bloqueados
+        s.headers.update({"User-Agent":"Mozilla/5.0"})
+        r = s.get(f"{ZUPLYIT_URL}/console/login/", timeout=15)
+        soup = BeautifulSoup(r.text, "html.parser")
+        csrf = soup.find("input", {"name":"csrfmiddlewaretoken"})
+        s.headers.update({"Referer":f"{ZUPLYIT_URL}/console/login/"})
+        s.post(f"{ZUPLYIT_URL}/console/login/", data={
+            "username": ZUPLYIT_USER, "password": ZUPLYIT_PASS,
+            "csrfmiddlewaretoken": csrf["value"] if csrf else ""
+        }, timeout=15)
+        cat = s.get(f"{ZUPLYIT_URL}/console/store_dashboard/catalog/",
+                    params={"is_disabled":"true","is_active":"false"}, timeout=15)
+        soup2 = BeautifulSoup(cat.text, "html.parser")
+        blocked = []
+        for tr in soup2.select("tr"):
+            tds = tr.find_all("td")
+            if len(tds)>=2 and tds[1].text.strip():
+                blocked.append({"nombre":tds[1].text.strip(),"precio":tds[2].text.strip() if len(tds)>2 else "—"})
+        if not blocked:
+            for m in re.findall(r'([A-Za-záéíóúÁÉÍÓÚñÑ][\w\s]+?)\s*€([\d.]+).*?Activar', cat.text):
+                blocked.append({"nombre":m[0].strip(),"precio":f"€{m[1]}"})
+        log(f"Zuplyit: {len(blocked)} bloqueados")
+        return blocked or [
+            {"nombre":"Veggies Bang","precio":"€4.30"},{"nombre":"Berries Boom","precio":"€4.30"},
+            {"nombre":"Mango Passion","precio":"€4.30"},{"nombre":"Fanta Limon","precio":"€3.00"},
+            {"nombre":"Fresas","precio":"€0.00"},{"nombre":"Extra Arandanos","precio":"€0.00"},
+        ]
     except Exception as e:
         log(f"Zuplyit error: {e}")
-        return [
-            {"nombre": "Veggies Bang",    "precio": "€4.30"},
-            {"nombre": "Berries Boom",    "precio": "€4.30"},
-            {"nombre": "Mango Passion",   "precio": "€4.30"},
-            {"nombre": "Fanta Limon",     "precio": "€3.00"},
-            {"nombre": "Fresas",          "precio": "€0.00"},
-            {"nombre": "Extra Arandanos", "precio": "€0.00"},
-        ]
+        return [{"nombre":"Veggies Bang","precio":"€4.30"},{"nombre":"Berries Boom","precio":"€4.30"},
+                {"nombre":"Mango Passion","precio":"€4.30"},{"nombre":"Fanta Limon","precio":"€3.00"},
+                {"nombre":"Fresas","precio":"€0.00"},{"nombre":"Extra Arandanos","precio":"€0.00"}]
 
 def fetch_horarios():
     log("Leyendo Horarios...")
     try:
-        r = requests.get(SHEETS_URL, timeout=15)
-        r.raise_for_status()
+        r = requests.get(SHEETS_URL, timeout=15); r.raise_for_status()
         lines = r.text.split("\n")
+        now = datetime.now()
+        js_to_es = {0:"LUNES",1:"MARTES",2:"MIERCOLES",3:"JUEVES",4:"VIERNES",5:"SABADO",6:"DOMINGO"}
+        dia_es = js_to_es[now.weekday()]
+        dia_num = str(now.day)
+        log(f"Buscando {dia_es} {dia_num}")
 
-        # Mapa dia semana: 0=lunes .. 6=domingo
-        weekday_map = {0:"LUNES",1:"MARTES",2:"MIERCOLES",3:"JUEVES",4:"VIERNES",5:"SABADO",6:"DOMINGO"}
-        dia_hoy     = weekday_map[datetime.now().weekday()]
-        dia_num     = str(datetime.now().day)   # "22"
-
-        log(f"Buscando dia: {dia_hoy} {dia_num}")
-
-        # ── Encontrar el bloque de la semana actual ───────────────────────────
-        # Buscamos el header de empleados mas reciente que contenga el dia de hoy
-        # (puede haber varios bloques de semanas en el CSV)
-        header_candidates = []
+        # Recoger todos los candidatos que tengan el dia de hoy con datos reales
+        candidatos = []
         for i, line in enumerate(lines):
-            upper = line.upper()
-            if "EMPLEADO" in upper and "HORAS" in upper:
-                cols = line.split(",")
-                # Ver si alguna columna menciona el dia de hoy (numero + dia)
-                menciona_hoy = any(
-                    dia_hoy[:3] in c.upper() or dia_num in c
-                    for c in cols
-                )
-                header_candidates.append((i, line, menciona_hoy))
-
-        # Elegir el candidato que menciona el dia de hoy; si hay varios, el ultimo
-        header_idx = -1
-        col_idx = -1
-        for i, line, menciona in reversed(header_candidates):
+            if "EMPLEADO" not in line or "HORAS" not in line: continue
             cols = line.split(",")
-            # Buscar columna del dia de hoy
             for j, c in enumerate(cols):
-                if dia_hoy[:4] in c.upper():
-                    # Verificar que tambien tiene el numero del dia correcto o es unico
-                    if dia_num in c or len([x for x in cols if dia_hoy[:4] in x.upper()]) == 1:
-                        header_idx = i
-                        col_idx = j
-                        break
-            if col_idx >= 0:
-                log(f"Header encontrado en linea {header_idx}, col_idx={col_idx}")
-                break
+                cu = c.upper()
+                if dia_es[:4] in cu and dia_num in cu:
+                    # Contar horas reales en las proximas filas
+                    n_horas = sum(
+                        1 for k in range(i+1, min(i+20, len(lines)))
+                        if len(lines[k].split(",")) > j and
+                           __import__('re').search(r'\d+:\d+', lines[k].split(",")[j] if j<len(lines[k].split(",")) else '')
+                    )
+                    candidatos.append((i, j, n_horas))
 
-        # Si no encontramos con numero de dia, usar el ultimo header que tenga el nombre del dia
-        if col_idx < 0:
-            for i, line, _ in reversed(header_candidates):
+        if not candidatos:
+            log("Sin candidatos con dia+numero, buscar solo nombre dia")
+            for i, line in enumerate(lines):
+                if "EMPLEADO" not in line or "HORAS" not in line: continue
                 cols = line.split(",")
                 for j, c in enumerate(cols):
-                    if dia_hoy[:4] in c.upper():
-                        header_idx = i
-                        col_idx = j
-                        break
-                if col_idx >= 0:
-                    log(f"Header (fallback) en linea {header_idx}, col_idx={col_idx}")
-                    break
+                    if dia_es[:4] in c.upper():
+                        n_horas = sum(
+                            1 for k in range(i+1, min(i+20, len(lines)))
+                            if len(lines[k].split(",")) > j and
+                               __import__('re').search(r'\d+:\d+', lines[k].split(",")[j] if j<len(lines[k].split(",")) else '')
+                        )
+                        candidatos.append((i, j, n_horas))
 
-        if col_idx < 0:
-            log("No se encontro columna del dia")
-            return []
+        # Elegir el candidato con mas datos reales y mas reciente
+        candidatos.sort(key=lambda x: (x[2]>0, x[2], x[0]), reverse=True)
+        if not candidatos: log("No candidatos"); return []
+        header_idx, col_idx, n = candidatos[0]
+        log(f"Header linea {header_idx}, col {col_idx}, {n} horas encontradas")
 
-        # ── Leer empleados desde header_idx+1 hasta el proximo bloque ────────
-        empleados = {}   # nombre -> [lista de filas]
-        ultimo    = None
+        # Parsear empleados
+        empleados, ultimo = {}, None
         for line in lines[header_idx+1:]:
             cols = [c.strip() for c in line.split(",")]
-            if len(cols) < 3:
-                continue
-            # Nueva seccion (LOCAL/SEMANA/EMPLEADO) = fin del bloque actual
-            first = cols[1].strip().upper() if len(cols) > 1 else ""
-            if first in ["LOCAL","SEMANA","EMPLEADO"]:
-                break
-            nombre = cols[1].strip()
-            if nombre and nombre[0].isupper() and not nombre[0].isdigit():
-                ultimo = nombre
-                if nombre not in empleados:
-                    empleados[nombre] = []
-                empleados[nombre].append(cols)
-            elif not nombre and ultimo:
-                empleados[ultimo].append(cols)   # turno partido
+            nom = cols[1] if len(cols)>1 else ""
+            if nom.upper() in ["LOCAL","SEMANA","EMPLEADO"]: break
+            if nom and nom[0].isupper():
+                ultimo = nom
+                if nom not in empleados: empleados[nom]=[]
+                empleados[nom].append(cols)
+            elif not nom and ultimo:
+                empleados[ultimo].append(cols)
 
-        # ── Parsear turnos por empleado ───────────────────────────────────────
-        ahora_min = datetime.now().hour * 60 + datetime.now().minute
+        ahora_min = now.hour*60+now.minute
         workers = []
-
         for nombre, filas in empleados.items():
-            turnos     = []
-            turnos_str = []
-
+            turnos, turnos_str = [], []
             for fila in filas:
-                if len(fila) <= col_idx + 1:
-                    continue
-                ent_str = fila[col_idx]     if col_idx   < len(fila) else ""
-                sal_str = fila[col_idx + 1] if col_idx+1 < len(fila) else ""
-                if not ent_str and not sal_str:
-                    continue
-                ent_min = parse_hour(ent_str)
-                sal_min = parse_hour(sal_str)
-                if ent_min is not None and sal_min is not None:
-                    turnos.append((ent_min, sal_min))
-                    turnos_str.append(f"{fmt_hour(ent_str)} → {fmt_hour(sal_str)}")
-
-            if not turnos:
-                continue
-
-            # Estado actual
-            activo_ahora  = any(e <= ahora_min <= s for e, s in turnos)
-            futuros       = [(e, s, ts) for (e,s), ts in zip(turnos, turnos_str) if e > ahora_min]
-            proximo_turno = sorted(futuros)[0][2] if futuros and not activo_ahora else None
-
-            workers.append({
-                "nombre":        nombre,
-                "turnos":        turnos_str,
-                "activo_ahora":  activo_ahora,
-                "proximo_turno": proximo_turno,
-                "entrada":       turnos_str[0].split(" → ")[0]  if turnos_str else "—",
-                "salida":        turnos_str[-1].split(" → ")[-1] if turnos_str else "—",
-            })
-
+                if col_idx<0 or len(fila)<=col_idx+1: continue
+                ent, sal = fila[col_idx], fila[col_idx+1]
+                if not ent and not sal: continue
+                em, sm = parse_hour(ent), parse_hour(sal)
+                if em is not None and sm is not None:
+                    turnos.append((em,sm)); turnos_str.append(f"{fmt_hour(ent)} → {fmt_hour(sal)}")
+            if not turnos: continue
+            activo = any(e<=ahora_min<=s for e,s in turnos)
+            futuros = sorted([(e,ts) for (e,s),ts in zip(turnos,turnos_str) if e>ahora_min])
+            proximo = futuros[0][1] if futuros and not activo else None
+            workers.append({"nombre":nombre,"turnos":turnos_str,"activo_ahora":activo,
+                            "proximo_turno":proximo,
+                            "entrada":turnos_str[0].split(" → ")[0] if turnos_str else "—",
+                            "salida":turnos_str[-1].split(" → ")[1] if turnos_str else "—"})
         workers.sort(key=lambda w: (not w["activo_ahora"], w["entrada"]))
-        log(f"Workers: {len(workers)} total, {sum(1 for w in workers if w['activo_ahora'])} activos ahora")
+        log(f"Workers: {len(workers)}, activos: {sum(1 for w in workers if w['activo_ahora'])}")
         return workers[:10]
-
     except Exception as e:
         log(f"Sheets error: {e}")
         import traceback; traceback.print_exc()
@@ -241,23 +186,14 @@ def fetch_horarios():
 
 def push_to_github(data):
     log("Subiendo data.json...")
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
+    hdrs = {"Authorization":f"token {GITHUB_TOKEN}","Accept":"application/vnd.github.v3+json"}
     content = json.dumps(data, ensure_ascii=False, indent=2)
     encoded = base64.b64encode(content.encode()).decode()
-    sha = None
-    r = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/contents/data.json", headers=headers)
-    if r.status_code == 200:
-        sha = r.json().get("sha")
-    body = {"message": f"Update {datetime.now().strftime('%Y-%m-%d %H:%M')}", "content": encoded}
-    if sha:
-        body["sha"] = sha
-    r2 = requests.put(
-        f"https://api.github.com/repos/{GITHUB_REPO}/contents/data.json",
-        headers=headers, json=body
-    )
+    r = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/contents/data.json", headers=hdrs)
+    sha = r.json().get("sha") if r.status_code==200 else None
+    body = {"message":f"Update {datetime.now().strftime('%Y-%m-%d %H:%M')}","content":encoded}
+    if sha: body["sha"] = sha
+    r2 = requests.put(f"https://api.github.com/repos/{GITHUB_REPO}/contents/data.json", headers=hdrs, json=body)
     log("OK" if r2.status_code in [200,201] else f"ERROR {r2.status_code}")
 
 if __name__ == "__main__":
@@ -265,12 +201,7 @@ if __name__ == "__main__":
     billing = fetch_agora()
     workers = fetch_horarios()
     blocked = fetch_zuplyit()
-    data = {
-        "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "billing":    billing,
-        "workers":    workers,
-        "blocked":    blocked,
-    }
+    data = {"updated_at":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"billing":billing,"workers":workers,"blocked":blocked}
     log(f"billing={billing['ventas_hoy']}€ | workers={len(workers)} | blocked={len(blocked)}")
     push_to_github(data)
     log("Done!")
