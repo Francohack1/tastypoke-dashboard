@@ -154,18 +154,37 @@ function renderWorkers(workers){
   const el=document.getElementById('workers-body');
   if(!workers||!workers.length){el.innerHTML='<p style="font-size:.75rem;color:var(--ink-muted)">Sin datos de horario hoy</p>';return;}
   const today=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  const activos=workers.filter(w=>w.activo_ahora).length;
   el.innerHTML=`
     <div class="shift-header">
       <span class="shift-date">${today.charAt(0).toUpperCase()+today.slice(1)}</span>
-      <span class="badge badge-teal">↗ ${workers.length} activos</span>
+      <span class="badge badge-teal">↗ ${activos} activos ahora</span>
     </div>
     <div class="worker-list">
-      ${workers.map((w,i)=>{const c=COLORS[i%COLORS.length];const ini=w.nombre.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
-        return `<div class="worker-row"><div class="worker-avatar" style="background:${c.bg};color:${c.c}">${ini}</div><div class="worker-info"><div class="worker-name">${w.nombre}</div><div class="worker-shift">${w.entrada} → ${w.salida}</div></div><div style="font-size:0.8rem">🟢</div></div>`;
+      ${workers.map((w,i)=>{
+        const c=COLORS[i%COLORS.length];
+        const ini=w.nombre.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+        // Estado: activo ahora / proximo turno / libre hoy
+        let estadoIcon, estadoText, rowStyle='';
+        if(w.activo_ahora){
+          estadoIcon='🟢';estadoText='';rowStyle='';
+        } else if(w.proximo_turno){
+          estadoIcon='🕐';estadoText=`<div style="font-size:0.58rem;color:var(--gold);margin-top:2px">entra ${w.proximo_turno.split(' → ')[0]}</div>`;rowStyle='opacity:0.75';
+        } else {
+          estadoIcon='⚫';estadoText=`<div style="font-size:0.58rem;color:var(--ink-muted);margin-top:2px">fuera de turno</div>`;rowStyle='opacity:0.5';
+        }
+        // Mostrar todos los turnos del dia
+        const turnosHtml = w.turnos && w.turnos.length > 1
+          ? w.turnos.map((t,ti) => `<div class="worker-shift" style="${ti>0?'color:var(--gold)':''}">${ti===0?'':''}${t}</div>`).join('')
+          : `<div class="worker-shift">${w.turnos?.[0]||w.entrada+' → '+w.salida}</div>`;
+        return `<div class="worker-row" style="${rowStyle}">
+          <div class="worker-avatar" style="background:${c.bg};color:${c.c}">${ini}</div>
+          <div class="worker-info"><div class="worker-name">${w.nombre}</div>${turnosHtml}${estadoText}</div>
+          <div style="font-size:0.9rem">${estadoIcon}</div>
+        </div>`;
       }).join('')}
     </div>
-    <div class="source-tag">↗ Google Sheets</div>`;
-}
+    <div class="source-tag">↗ Google Sheets</div>`;}
 
 function renderBlocked(items){
   const el=document.getElementById('blocked-body');
