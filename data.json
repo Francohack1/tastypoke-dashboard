@@ -1,5 +1,5 @@
 {
-  "updated_at": "22/3/2026, 17:28:26",
+  "updated_at": "22/3/2026, 17:30:36",
   "billing": {
     "ventas_hoy": 450,
     "semana": 6140,
@@ -7,7 +7,39 @@
     "tickets": 20,
     "ticket_medio": 23
   },
-  "workers": [],
+  "workers": [
+    {
+      "nombre": "Stephanie",
+      "turnos": [
+        "1:30:PM → 9:30:PM"
+      ],
+      "activo_ahora": true,
+      "proximo_turno": null,
+      "entrada": "1:30:PM",
+      "salida": "9:30:PM"
+    },
+    {
+      "nombre": "Tarik",
+      "turnos": [
+        "9:00:AM → 3:00:PM",
+        "9:30:PM → 11:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "9:30:PM → 11:30:PM",
+      "entrada": "9:00:AM",
+      "salida": "11:30:PM"
+    },
+    {
+      "nombre": "Vera",
+      "turnos": [
+        "8:00:PM → 10:00:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "8:00:PM → 10:00:PM",
+      "entrada": "8:00:PM",
+      "salida": "10:00:PM"
+    }
+  ],
   "blocked": [
     {
       "nombre": "Veggies Bang",
