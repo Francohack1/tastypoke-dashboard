@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-06 23:40:50",
+  "updated_at": "2026-04-07 01:02:51",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -15,7 +15,7 @@
         "6:00:PM → 11:30:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "1:30:PM → 3:30:PM",
       "entrada": "1:30:PM",
       "salida": "11:30:PM"
     },
@@ -25,7 +25,7 @@
         "8:00:PM → 10:00:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "8:00:PM → 10:00:PM",
       "entrada": "8:00:PM",
       "salida": "10:00:PM"
     },
@@ -35,7 +35,7 @@
         "9:15:AM → 6:00:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "9:15:AM → 6:00:PM",
       "entrada": "9:15:AM",
       "salida": "6:00:PM"
     }
