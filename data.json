@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-13 23:52:43",
+  "updated_at": "2026-04-14 02:29:52",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -9,13 +9,13 @@
   },
   "workers": [
     {
-      "nombre": "Stephanie",
+      "nombre": "Alex",
       "turnos": [
         "11:00:AM → 5:00:PM",
         "8:00:PM → 10:00:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "11:00:AM → 5:00:PM",
       "entrada": "11:00:AM",
       "salida": "10:00:PM"
     },
@@ -25,7 +25,7 @@
         "1:30:PM → 3:30:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "1:30:PM → 3:30:PM",
       "entrada": "1:30:PM",
       "salida": "3:30:PM"
     },
@@ -35,7 +35,7 @@
         "5:00:PM → 11:30:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "5:00:PM → 11:30:PM",
       "entrada": "5:00:PM",
       "salida": "11:30:PM"
     }
