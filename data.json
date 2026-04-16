@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-15 23:10:18",
+  "updated_at": "2026-04-16 00:00:54",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -7,6 +7,38 @@
     "semana": 0,
     "mes": 0
   },
-  "workers": [],
+  "workers": [
+    {
+      "nombre": "Marouane de apoyo",
+      "turnos": [
+        "1:30:PM → 3:30:PM",
+        "8:30:PM → 10:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "1:30:PM → 3:30:PM",
+      "entrada": "1:30:PM",
+      "salida": "10:30:PM"
+    },
+    {
+      "nombre": "Alex",
+      "turnos": [
+        "3:30:PM → 11:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "3:30:PM → 11:30:PM",
+      "entrada": "3:30:PM",
+      "salida": "11:30:PM"
+    },
+    {
+      "nombre": "Stephanie",
+      "turnos": [
+        "9:15:AM → 3:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "9:15:AM → 3:30:PM",
+      "entrada": "9:15:AM",
+      "salida": "3:30:PM"
+    }
+  ],
   "blocked": []
 }
