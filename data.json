@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-20 18:39:31",
+  "updated_at": "2026-04-20 19:46:25",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -14,9 +14,19 @@
         "11:30:AM → 4:30:PM",
         "7:00:PM → 11:45:PM"
       ],
-      "activo_ahora": false,
-      "proximo_turno": "7:00:PM → 11:45:PM",
+      "activo_ahora": true,
+      "proximo_turno": null,
       "entrada": "11:30:AM",
+      "salida": "11:45:PM"
+    },
+    {
+      "nombre": "Persona en Pruebas/formaciÃ³n",
+      "turnos": [
+        "7:00:PM → 11:45:PM"
+      ],
+      "activo_ahora": true,
+      "proximo_turno": null,
+      "entrada": "7:00:PM",
       "salida": "11:45:PM"
     },
     {
@@ -28,16 +38,6 @@
       "proximo_turno": null,
       "entrada": "1:30:PM",
       "salida": "3:30:PM"
-    },
-    {
-      "nombre": "Persona en Pruebas/formaciÃ³n",
-      "turnos": [
-        "7:00:PM → 11:45:PM"
-      ],
-      "activo_ahora": false,
-      "proximo_turno": "7:00:PM → 11:45:PM",
-      "entrada": "7:00:PM",
-      "salida": "11:45:PM"
     }
   ],
   "blocked": []
