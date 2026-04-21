@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-20 23:12:10",
+  "updated_at": "2026-04-21 00:01:11",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -9,25 +9,15 @@
   },
   "workers": [
     {
-      "nombre": "Stephanie sola con pruebas/ Formacion",
+      "nombre": "Alex sola con maruan de apoyo o persona aprendiendo",
       "turnos": [
         "11:30:AM → 4:30:PM",
-        "7:00:PM → 11:45:PM"
+        "7:30:PM → 11:30:PM"
       ],
-      "activo_ahora": true,
-      "proximo_turno": null,
+      "activo_ahora": false,
+      "proximo_turno": "11:30:AM → 4:30:PM",
       "entrada": "11:30:AM",
-      "salida": "11:45:PM"
-    },
-    {
-      "nombre": "Persona en Pruebas/formaciÃ³n",
-      "turnos": [
-        "7:00:PM → 11:45:PM"
-      ],
-      "activo_ahora": true,
-      "proximo_turno": null,
-      "entrada": "7:00:PM",
-      "salida": "11:45:PM"
+      "salida": "11:30:PM"
     },
     {
       "nombre": "Maruan apoyo y persona en formacion",
@@ -35,9 +25,19 @@
         "1:30:PM → 3:30:PM"
       ],
       "activo_ahora": false,
-      "proximo_turno": null,
+      "proximo_turno": "1:30:PM → 3:30:PM",
       "entrada": "1:30:PM",
       "salida": "3:30:PM"
+    },
+    {
+      "nombre": "Persona en Pruebas/formaciÃ³n",
+      "turnos": [
+        "6:00:PM → 11:45:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "6:00:PM → 11:45:PM",
+      "entrada": "6:00:PM",
+      "salida": "11:45:PM"
     }
   ],
   "blocked": []
