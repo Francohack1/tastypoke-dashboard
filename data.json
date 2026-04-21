@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-21 18:48:55",
+  "updated_at": "2026-04-21 19:58:08",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -14,8 +14,8 @@
         "11:45:AM → 4:30:PM",
         "7:15:PM → 11:30:PM"
       ],
-      "activo_ahora": false,
-      "proximo_turno": "7:15:PM → 11:30:PM",
+      "activo_ahora": true,
+      "proximo_turno": null,
       "entrada": "11:45:AM",
       "salida": "11:30:PM"
     },
