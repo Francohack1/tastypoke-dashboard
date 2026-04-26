@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-25 23:43:58",
+  "updated_at": "2026-04-26 01:14:56",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -7,6 +7,37 @@
     "semana": 0,
     "mes": 0
   },
-  "workers": [],
+  "workers": [
+    {
+      "nombre": "Stephanie sola con pruebas/ Formacion",
+      "turnos": [
+        "1:30:PM → 10:00:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "1:30:PM → 10:00:PM",
+      "entrada": "1:30:PM",
+      "salida": "10:00:PM"
+    },
+    {
+      "nombre": "TANIA",
+      "turnos": [
+        "8:00:PM → 11:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "8:00:PM → 11:30:PM",
+      "entrada": "8:00:PM",
+      "salida": "11:30:PM"
+    },
+    {
+      "nombre": "ALEX",
+      "turnos": [
+        "9:15:AM → 3:30:PM"
+      ],
+      "activo_ahora": false,
+      "proximo_turno": "9:15:AM → 3:30:PM",
+      "entrada": "9:15:AM",
+      "salida": "3:30:PM"
+    }
+  ],
   "blocked": []
 }
