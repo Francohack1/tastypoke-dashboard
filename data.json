@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-04 17:07:08",
+  "updated_at": "2026-05-04 18:55:01",
   "billing": {
     "ventas_hoy": 0,
     "tickets": 0,
@@ -66,6 +66,14 @@
     {
       "nombre": "Fresas (INGR.FRESAS_GRANDE)",
       "precio": "€0.00"
+    },
+    {
+      "nombre": "Tasty Ceviche Classic (TASTY_CEVICHE_CLASSIC)",
+      "precio": "€15.50"
+    },
+    {
+      "nombre": "Tasty Ceviche Special (TASTY_CEVICHE_SPECIAL)",
+      "precio": "€15.90"
     },
     {
       "nombre": "Fanta Limón (FANTA_LIMON)",
